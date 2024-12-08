@@ -46,3 +46,30 @@ Si le mot de passe correspond. L'utilisateur est authentifié et on lui transmet
 - Sa clé publique de signature
 - Le sel pour récuper la clé symetrique
 - le cipher de la clé privée du chiffremeent et de la signature
+
+## Envois de message 
+
+Voici les étapes pour l'envois d'un message dans le future :
+
+1. On crée notre message M
+2. On donne une date à laquelle, on peut le déchiffrer. On obtient D
+3. On crée la clé symetrique pour chiffrer le message
+4. On chiffre le message avec la clé symetrique, on obtient C
+5. On chiffre la clé symetrique avec la clé publique de la personne à qui on veut envoyer le message, on obtient I
+6. On signe C || D avec la clé privée de signature. On obtient S
+7. On transmet au serveur S, D, C , I , Destinataire du message
+
+## Reception du message 
+
+Si Alice envoit un message à Bob. Ce dernier peut le récuper, mais temps que la date que Alice à décidée n'est pas atteinte, Bob ne pourra pas déchiffrer le message.
+
+Bob peut donc dans un premier temps juste récuperer C, le message chiffré.
+Il peut également récuperer la clé publique de signature d'Alice pour controler que c'est elle qui envoit.
+
+Une fois la date arrivée, le serveur peut envoyé la clé de déchiffrement à Bob.
+
+# Amélioration de l'application 
+
+## 1 Mise en place d'un OTP
+
+## 2 
