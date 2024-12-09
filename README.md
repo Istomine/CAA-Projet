@@ -113,6 +113,14 @@ Une fois ces étapes effectuées, on peut revoyer au serveur :
 
 # Detail d'implementation 
 
+## Algorithme de chiffrement
+
+## Algorithme de signature
+
+## Algorithme d'Integrité 
+
+
+
 # Amélioration de l'application 
 
 ## 1 Mise en place d'un OTP
