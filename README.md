@@ -23,10 +23,10 @@ On applique une politique de mot de passe assez strict pour garantir qu'on ait d
 Etant donnée qu'il n'est plus recommandé d'imposer des exigences strict en therme de complexité de mot de passe. Une complexite en longeur sera imposé
 
 Une fois qu'on à nos deux valeurs, on va créer les clés pour pouvoir intéragir avec le serveur :
-- Le hash pour l'authentification => KDF(password || sel1) = password_hash
+- Le hash pour l'authentification => KDF(password || salt1) = hash_password
 - Une paire de clé asymetrique pour le chiffrement => pub_cipher / priv_cipher
 - Une paire de clé asymetrique pour la signature => pub_sign / priv_sign
-- Une clé symetrique dérivée du mot de passe utilisateur => KDF(password || sel2) = sym
+- Une clé symetrique dérivée du mot de passe utilisateur => KDF(password || salt2) = sym
 
 
 Et on va chiffrer :
@@ -73,7 +73,7 @@ Voici les étapes pour l'envois d'un message dans le future :
 3. On crée la clé symetrique pour chiffrer le message => sym_m
 4. On chiffre le message avec la clé symetrique => Cipher_sym_m(M) = C
 5. On chiffre la clé symetrique avec la clé publique de la personne à qui on veut envoyer le message => Cipher_pub_cipher(sym_m) = I
-6. On signe C || D avec la clé privée de signature de la personne qui envoit le message. Cela nous permet de savoir de façon sûr qu'une date est liée à un message => S
+6. On signe C || D avec la clé privée de signature de l'expediteur. Cela nous permet de savoir de façon sûr qu'une date est liée à un message => S
 7. On transmet au serveur S, D, C , I , Destinataire du message
 
 ## Reception du message 
@@ -94,10 +94,6 @@ Une fois qu'on a atteint la date, le destinataire recoit :
 ## Changement de mot de passe 
 
 Pour pouvoir changer de mot de passe, on doit d'abord être connecté. 
-
-Le serveur nous restransmet les fichiers suivant pour qu'on puisse les rechiffrer :
-- Le cipher de la clé privée de chiffrement par la clé symetrique => Eb1
-- Le cipher de la clé privée de signature par la clé symetrique => Eb2
 
 On doit recree une nouvelle clé symetrique pour chiffré les clés privées => KDF(new_password || new_salt2) = sym_m
 On chiffre les clés privées de signature et de chiffrement => Cipher_sym(priv_cipher) = Eb1 / Cipher_sym(priv_sign) = Eb2
