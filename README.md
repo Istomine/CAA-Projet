@@ -110,6 +110,9 @@ Une fois ces étapes effectuées, on peut revoyer au serveur :
 - Le nouveau hash => hash_password
 - Le nouveau sel de la clé symetrique => salt2
 
+
+# Detail d'implementation 
+
 # Amélioration de l'application 
 
 ## 1 Mise en place d'un OTP
