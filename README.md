@@ -121,23 +121,38 @@ J'ai suivie le recommandation du ANSSI en therme de taille de parametre cryptogr
 * Taille des parametres de la courbes Eliptique 256 bits
 * Taille de hash 256 bits 
 
+---------------------------------------------------------
+
+Etant donnée, que j'utilise la librairie PyNaCl, la taille des parametres est déjà definit :
 
 * Taille de clé symetrique 256 bits
 * Taille de nonce 192 bits
 
 * Pour la partie asymetrique, on utilise la Curve25519 qui a des nombre de 255 bits
 
+Comme on peut le voir, la parametre de la librairie sont golobalement correcte. 
+
 ## Algorithme de chiffrement
 
 Pour le chiffrement symetrique, j'utilise PyNaCl qui utilise XChacha20 pour le chiffrement dans la classe Aead.
 
-Pour 
+Pour le chiffremeent asymetrique la classe Box qui fait du chiffremeent sur une courbe eliptique
 
 ## Algorithme de signature
 
+L'algorithme de signature est Ed25519
+
 ## Algorithme d'Integrité 
 
+Etant donnée qu'on utilise XChacha20 pour chiffrer. On va utilise Poly1305 pour le MAC
 
+Pour le chiffrement asymetrique, on a aucune information sur le MAC, on sait juste qu'il est de 16 byte
+
+## Algorithme dérivation de clé
+
+Dans ce projet, on utilise Argon2id
+
+Quel parametre d'argon ?
 
 # Amélioration de l'application 
 
