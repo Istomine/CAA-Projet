@@ -113,7 +113,25 @@ Une fois ces étapes effectuées, on peut revoyer au serveur :
 
 # Detail d'implementation 
 
+## Parametre 
+
+J'ai suivie le recommandation du ANSSI en therme de taille de parametre cryptographique. L'année choisie est 2030 sur le site de keylenght. 
+
+* Taille de clé symetrique 128 bits
+* Taille des parametres de la courbes Eliptique 256 bits
+* Taille de hash 256 bits 
+
+
+* Taille de clé symetrique 256 bits
+* Taille de nonce 192 bits
+
+* Pour la partie asymetrique, on utilise la Curve25519 qui a des nombre de 255 bits
+
 ## Algorithme de chiffrement
+
+Pour le chiffrement symetrique, j'utilise PyNaCl qui utilise XChacha20 pour le chiffrement dans la classe Aead.
+
+Pour 
 
 ## Algorithme de signature
 
