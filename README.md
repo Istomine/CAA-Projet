@@ -62,6 +62,7 @@ Si le mot de passe correspond. L'utilisateur est authentifié et on lui transmet
 - Sa clé publique de signature => pub_sign
 - Le sel pour récuper la clé symetrique => salt2
 - le cipher de la clé privée du chiffremeent et de la signature => Eb1 / Eb2
+- Les messages
 
 ## Envois de message 
 
