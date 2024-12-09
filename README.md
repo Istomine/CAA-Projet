@@ -98,11 +98,17 @@ Le serveur nous restransmet les fichiers suivant pour qu'on puisse les rechiffre
 - Le cipher de la clé privée de chiffrement par la clé symetrique => Eb1
 - Le cipher de la clé privée de signature par la clé symetrique => Eb2
 
-Une fois cette étape effectuée, on peut revoyer au serveur :
-- Le cipher de la clé privée de chiffrement par la clé symetrique
-- Le cipher de la clé privée de signature par la clé symetrique
-- Le nouveau sel1
-- Le nouveau hash
+On doit recree une nouvelle clé symetrique pour chiffré les clés privées => KDF(new_password || new_salt2) = sym_m
+On chiffre les clés privées de signature et de chiffrement => Cipher_sym(priv_cipher) = Eb1 / Cipher_sym(priv_sign) = Eb2
+
+On recalcule un nouveau hash de mot de passe => KDF(new_password || new_sal1) = hash_password
+
+Une fois ces étapes effectuées, on peut revoyer au serveur :
+- Le cipher de la clé privée de chiffrement par la clé symetrique => Eb1
+- Le cipher de la clé privée de signature par la clé symetrique => Eb2
+- Le nouveau sel pour le hash du mot de passe => salt1
+- Le nouveau hash => hash_password
+- Le nouveau sel de la clé symetrique => salt2
 
 # Amélioration de l'application 
 
