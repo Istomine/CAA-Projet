@@ -124,6 +124,7 @@ Etant donnée, que j'utilise la librairie PyNaCl, la taille des parametres est d
 
 * Taille de clé symetrique 256 bits
 * Taille de nonce 192 bits
+* Taille du sel 128 bits
 
 * Pour la partie asymetrique, on utilise la Curve25519 qui a des nombre de 255 bits
 
