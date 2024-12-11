@@ -148,9 +148,15 @@ Pour le chiffrement asymetrique, on a aucune information sur le MAC, on sait jus
 
 ## Algorithme dérivation de clé
 
-Dans ce projet, on utilise Argon2id
+Dans ce projet, on utilise Argon2id, pour la polivalence.
+Etant donnée que tous les hashs se font du côté client et donc que le serveur n'a pas a supporter la charge de ces calcules, j'ai décidé d'augmenter la valeur des parametres.
 
-Quel parametre d'argon ?
+
+Pour le nombre de thread, j'ai mis a 5 threads
+Pour le cout mémoire, reste inchangé 
+Le cout en temps est de 0,5 sec en moyenne.
+
+Des tests ont été fait au prealable en local sur mon ordinateur. 
 
 # Amélioration de l'application 
 
