@@ -4,49 +4,44 @@ Implementation Messagerie dans le futur
 
 # Implementation
 
-## Creation de compte
+## Creation de compte (sign_in)
 
 A la creation de compte, on a besoin de deux choses de l'utilisateur :
 
 - Un nom d'utilisateur => username
-- Un mot de passe (avec contrôle de la robustesse du mot de passe) => password
+- Un mot de passe  => password
 
-On applique une politique de mot de passe assez strict pour garantir qu'on ait des mot de passe solide :
+On a également besoin de deux sels:
 
-- Longeur minimum 12 caractères
-- Longeur maximale 64 caractères
-- Utilisation d'au minimum 1 majuscules
-- Utilisation d'au minimum 1 chiffres
-- Utilisation d'au minimum 1 symboles spécial
-- Autorisation des caractère ascii uniquement 
+1. Pour le hashage du mot de passe de l'utilisateur. Ce hash est utilisé pour l'authentification => sal1
+2. Pour la dérivation de la clé symetrique => sal2
 
-Etant donnée qu'il n'est plus recommandé d'imposer des exigences strict en therme de complexité de mot de passe. Une complexite en longeur sera imposé
 
-Une fois qu'on à nos deux valeurs, on va créer les clés pour pouvoir intéragir avec le serveur :
+Une fois qu'on à nos deux valeurs et deux sels, on va créer les clés pour pouvoir intéragir avec le serveur :
 - Le hash pour l'authentification => KDF(password || salt1) = hash_password
 - Une paire de clé asymetrique pour le chiffrement => pub_cipher / priv_cipher
 - Une paire de clé asymetrique pour la signature => pub_sign / priv_sign
 - Une clé symetrique dérivée du mot de passe utilisateur => KDF(password || salt2) = sym
 
 
-Et on va chiffrer :
-- Le cipher de la clé privée de chiffrement par la clé symetrique => Cipher_sym(priv_cipher) = Eb1
-- Le cipher de la clé privée de signature par la clé symetrique => Cipher_sym(priv_sign) = Eb2
+On va chiffrer :
+- La clé privée de chiffrement par la clé symetrique => Cipher_sym(priv_sign) = Eb1
+- La clé privée de signature par la clé symetrique => Cipher_sym(priv_cipher) = Eb2
 
 
 On envoit au serveur :
 - Username
 - Hash_password
 - salt1
-- pub_cipher
-- pub_sign
 - salt2
 - Eb1
 - Eb2
+- pub_cipher
+- pub_sign
 
-## Connexion au compte
+Le serveur recoit les données et les stocks dans une base de donné au format json
 
-<!-- Lors de la connexion, on établie un canal SSL/TLS entre le serveur et le client. Dans un premier temps, lorsque le canal est confidentiel, on transmet notre nom d'utilisateur. -->
+## Connexion au compte (login)
 
 L'utilisateur envoit dans un premier temps son nom d'utilisateur au serveur. 
 
@@ -54,17 +49,21 @@ Une fois que le serveur à recu le nom d'utilisateur, il transmet le sel correpo
 
 Le client, une fois le sel recu, peut reconstituer le hash mot de passe et le transmettre au serveur.
 
-Si le mot de passe hashé ne correpond pas à ce que le serveur à dans la base de donnée, on redemande au client de saisir son mot de passe.
+Si le mot de passe hashé ne correpond pas à ce que le serveur à dans la base de donnée,on recommence la procedure de login.
 
-Si le mot de passe correspond. L'utilisateur est authentifié et on lui transmet les informations pour pouvoir dechiffrer les messages recu ou envoyer des messages :
+Si le mot de passe correspond. L'utilisateur est authentifié et on lui transmet les informations pour pouvoir dechiffrer ou envoyer des messages :
 
+- Son nom d'utilisateur => username
+- Son mot de passe hashé => hash_password
 - Sa clé publique de chiffrement => pub_cipher
 - Sa clé publique de signature => pub_sign
 - Le sel pour récuper la clé symetrique => salt2
-- le cipher de la clé privée du chiffremeent et de la signature => Eb1 / Eb2
-- Les messages
+- Le cipher de la clé privée de chiffremeent et de la signature => Eb1 / Eb2
+
 
 ## Envois de message 
+
+Pour executer cette fonction l'utilisateur doit être authentifié. C'est-à-dire être en possesion d'un Username/Hash_password correcte. Il devra les transmettre a chaque fois 
 
 Voici les étapes pour l'envois d'un message dans le future :
 
@@ -127,7 +126,7 @@ Ce qui me donne ces parametres recommandé :
 Pour le chiffrement symetrique, j'utilise PyNaCl qui utilise XChacha20 pour le chiffrement dans la classe Aead.
 Et Poly1305 comme MAC.
 
-La taille de la clé est de 256 bits
+La taille de la clé est de 256 bits (un sel de 128 bits et utilisé)
 La taille du nonce est de 192 bits.
 La taille du compteur est de 64 bits
 La taille du bloque est de 512 bits
@@ -172,3 +171,10 @@ Des tests ont été fait au prealable en local sur mon ordinateur.
 
 ## 2 Mise en place d'un tunnel TLS
 
+<!-- Lors de la connexion, on établie un canal SSL/TLS entre le serveur et le client. Dans un premier temps, lorsque le canal est confidentiel, on transmet notre nom d'utilisateur. -->
+
+
+
+# Potentiel d'amélioration
+
+En l'état actule il n'y a pas de verification de la robustesse du mot de passe. La fonction est en place, mais il manque le code qui applique une politique de mot de passe.
