@@ -42,7 +42,81 @@ Les options de l'interface incluent :
 
 # Organisation du code
 
+Ce projet est divisé en deux grandes catégories : le client et le serveur, chacun étant conçu pour accomplir des tâches spécifiques liées à l'application de messagerie sécurisée.
+
 # Implementation
+
+## Organisation détaillée du code du projet
+
+Ce projet est divisé en deux grandes catégories : le **client** et le **serveur**, chacun étant conçu pour accomplir des tâches spécifiques liées à l'application de messagerie sécurisée.
+
+---
+
+### **1. Côté Client**
+Le client est responsable de l'interface utilisateur et de la gestion locale des données avant leur envoi au serveur.
+
+#### **Principaux fichiers et responsabilités**
+1. **`client.py`**
+   - Point d'entrée principal pour le client.
+   - Gère la connexion au serveur via socket.
+   - Menu principal pour se connecter, s'inscrire, ou quitter.
+   - Dirige les utilisateurs connectés vers des fonctionnalités comme l'envoi de messages ou la modification du mot de passe.
+
+2. **`clientCommunication.py`**
+   - Gère l'interaction avec le serveur (envoi/réception de messages, connexion, modification de mot de passe).
+   - Sécurise les données avant leur envoi grâce à des mécanismes cryptographiques.
+   - Principales fonctions :
+     - `sign_in`: Inscription d'un nouvel utilisateur avec génération des clés nécessaires.
+     - `login`: Authentification d'un utilisateur existant.
+     - `send_message`: Chiffrement et envoi d'un message à un destinataire spécifique.
+     - `receive_message`: Déchiffrement des messages reçus.
+     - `change_password`: Permet à l'utilisateur de modifier son mot de passe.
+
+3. **`communication_utils.py`**
+   - Implémente des fonctions utilitaires pour tester les sockets et gérer les fichiers :
+     - `process_file`: Chiffre ou déchiffre un fichier selon les besoins.
+     - `test_socket`: Vérifie si le socket client est fonctionnel.
+
+4. **`crypto_utils.py`**
+   - Contient des fonctions pour la dérivation de clés (KDF) et le traitement des hachages.
+   - `KDF`: Dérive une clé sécurisée à partir d'un mot de passe et d'un sel.
+   - `hash_extruder`: Extrait un hachage spécifique du format Argon2.
+
+5. **`user_input.py`**
+   - Collecte les données utilisateur pour l'inscription, la connexion, et d'autres interactions.
+   - Affiche les menus et gère les choix des utilisateurs.
+
+6. **`time_utils.py`**
+   - Permet aux utilisateurs d'entrer une date et une heure dans un format précis.
+   - Garantit que les dates respectent le format ISO.
+
+---
+
+### **2. Côté Serveur**
+Le serveur centralise les données des utilisateurs et des messages. Il assure l'authentification, le stockage et la distribution des messages.
+
+#### **Principaux fichiers et responsabilités**
+1. **`server.py`**
+   - Point d'entrée principal pour le serveur.
+   - Configure et écoute les connexions client.
+   - Dirige les demandes vers les gestionnaires appropriés (login, inscription, envoi/réception de messages).
+
+2. **`serverCommunication.py`**
+   - Contient la logique pour gérer chaque type de demande client :
+     - `sign_in_handler`: Inscription d'un utilisateur avec validation des données.
+     - `login_handler`: Authentification des utilisateurs avec vérification des hachages.
+     - `message_handler`: Gère la réception et le stockage des messages chiffrés.
+     - `send_messages`: Récupère les messages pour un destinataire spécifique en fonction des dates.
+     - `send_keys`: Fournit les clés de déchiffrement si les conditions sont remplies.
+     - `change_password`: Met à jour les informations d'authentification d'un utilisateur.
+
+3. **`database.py`**
+   - Gère le stockage des informations utilisateur dans un fichier JSON.
+   - Assure la sécurité des données avec des verrous pour prévenir les problèmes de concurrence.
+
+4. **`message_database.py`**
+   - Gère le stockage des messages dans une base de données JSON.
+   - Fournit des fonctions pour ajouter et récupérer les messages en fonction de critères spécifiques (destinataire, date).
 
 ## Creation de compte (sign_in)
 
