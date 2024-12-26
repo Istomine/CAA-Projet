@@ -254,7 +254,7 @@ Cette fonction est similaire à la fonction receive_message. Elle est utilisée 
 Dans cette fonction, le contrôle de la signature du message n'est pas effectué, car cette vérification a déjà été réalisée dans la fonction receive_message.
 
 
-# Detail d'implementation 
+# Detail d'implementation cryptographique
 
 ## Parametres
 
