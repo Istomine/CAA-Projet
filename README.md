@@ -9,35 +9,35 @@ Créer une application permettant aux utilisateurs d'envoyer des messages qui ne
 
 Spécifications fonctionnelles :
 
-    Authentification des utilisateurs :
-        Les utilisateurs doivent se connecter avec un simple nom d'utilisateur et un mot de passe.
-        Possibilité de changer le mot de passe.
-        Accès à leur compte depuis n'importe quel appareil.
+Authentification des utilisateurs :
+    Les utilisateurs doivent se connecter avec un simple nom d'utilisateur et un mot de passe.
+    Possibilité de changer le mot de passe.
+    Accès à leur compte depuis n'importe quel appareil.
 
-    Gestion des messages :
-        Les utilisateurs peuvent envoyer des messages confidentiels à d'autres utilisateurs.
-        Les messages doivent être lisibles par le destinataire uniquement après une date prédéfinie (qui peut être passée ou future).
-        Le destinataire doit pouvoir connaître à tout moment la date de déverrouillage.
-        Les messages peuvent contenir des fichiers volumineux (vidéos, jeux, etc.).
-        Les fichiers peuvent être téléchargés avant la date de déverrouillage, mais restent chiffrés jusqu'à la date spécifiée.
-        Une dernière interaction courte avec le serveur est autorisée pour déchiffrer.
+Gestion des messages :
+    Les utilisateurs peuvent envoyer des messages confidentiels à d'autres utilisateurs.
+    Les messages doivent être lisibles par le destinataire uniquement après une date prédéfinie (qui peut être passée ou future).
+    Le destinataire doit pouvoir connaître à tout moment la date de déverrouillage.
+    Les messages peuvent contenir des fichiers volumineux (vidéos, jeux, etc.).
+    Les fichiers peuvent être téléchargés avant la date de déverrouillage, mais restent chiffrés jusqu'à la date spécifiée.
+    Une dernière interaction courte avec le serveur est autorisée pour déchiffrer.
 
-    Authentification des expéditeurs :
-        L'expéditeur doit être authentifié et ne doit pas pouvoir nier l'envoi du message (non-répudiation).
+Authentification des expéditeurs :
+    L'expéditeur doit être authentifié et ne doit pas pouvoir nier l'envoi du message (non-répudiation).
 
-    Adversaire :
-        Adversaires actifs envisagés.
-        Le serveur est honnête mais curieux : il respecte le protocole tout en tentant de compromettre la confidentialité des messages.
+Adversaire :
+    Adversaires actifs envisagés.
+    Le serveur est honnête mais curieux : il respecte le protocole tout en tentant de compromettre la confidentialité des messages.
 
-    Évolutivité :
-        Le système doit gérer un grand nombre d'utilisateurs (potentiellement des millions).
-        Minimisation des ressources utilisées par le serveur pour chiffrer les fichiers.
+Évolutivité :
+    Le système doit gérer un grand nombre d'utilisateurs (potentiellement des millions).
+    Minimisation des ressources utilisées par le serveur pour chiffrer les fichiers.
 
-    Interface utilisateur :
-        Les options de l'interface incluent :
-            Envoyer un message.
-            Lire les messages reçus (avec détails sur les dates de déverrouillage et expéditeurs).
-            Changer de mot de passe.
+Interface utilisateur :
+    Les options de l'interface incluent :
+        Envoyer un message.
+        Lire les messages reçus (avec détails sur les dates de déverrouillage et expéditeurs).
+        Changer de mot de passe.
 
 
 # Organisation du code
