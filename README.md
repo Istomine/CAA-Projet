@@ -61,36 +61,60 @@ Si le mot de passe correspond. L'utilisateur est authentifié et on lui transmet
 - Le cipher de la clé privée de chiffremeent et de la signature => Eb1 / Eb2
 
 
-## Envois de message 
+## Envois de message (send_message)
 
-Pour executer cette fonction l'utilisateur doit être authentifié. C'est-à-dire être en possesion d'un Username/Hash_password correcte. Il devra les transmettre a chaque fois 
+Pour executer cette fonction l'utilisateur doit être authentifié. C'est-à-dire être en possesion d'un Username/Hash_password correcte. Il devra les transmettre a chaque fois.
 
 Voici les étapes pour l'envois d'un message dans le future :
 
-1. On crée notre message => M
-2. On donne une date à laquelle, on peut le déchiffrer => D
+1. On demande à qui on veut envoyé le message. C'est utile car on doit demandé au serveur la clé publique de la personne à qui on envoit le message
+2. On crée notre message (ici ça sera un fichier qui contient un texte) => M
 3. On crée la clé symetrique pour chiffrer le message => sym_m
-4. On chiffre le message avec la clé symetrique => Cipher_sym_m(M) = C
-5. On chiffre la clé symetrique avec la clé publique de la personne à qui on veut envoyer le message => Cipher_pub_cipher(sym_m) = I
-6. On signe C || D avec la clé privée de signature de l'expediteur. Cela nous permet de savoir de façon sûr qu'une date est liée à un message => S
-7. On transmet au serveur S, D, C , I , Destinataire du message
+4. On chiffre le contenue du fichier et le nom du fichier => c_message , c_file_name
+5. On donne une date à laquelle, on peut le déchiffrer => date
+6. Avec la clé publique du destinataire on chiffre la clé symetrique qu'on a utilisé pour chiffrer le message => Cipher_pub_cipher(sym_m) = I
+7. On cree une structure qui contient le hash du message chiffré et la date à laquelle on peut ouvrir le message. Cela nous permet de savoir de façon sûr qu'une date est liée à un message
 
-## Reception du message 
+Cette structure contient toutes les données qu'on veut signer. Et c'est cette derniere qu'on va signer avec la clé privée de l'expediteur  => S
+
+8. On transmet au serveur :
+- Le nom de l'expediteur
+- Le nom du destinataire
+- La date à laquelle on peut lire le message
+- la signature
+- Le message chiffré
+- Le nom du fichié chiffré
+- La clé de chiffrement du message et du nom du fichié, chiffré
+
+Le serveur à la reception du message, va attribuer un ID unique au message et le stocker dans un base de donnée dédié aux messages au format json.
+
+## Reception du message (reveive_message)
+
+Pour executer cette fonction l'utilisateur doit être authentifié. C'est-à-dire être en possesion d'un Username/Hash_password correcte. Il devra les transmettre a chaque fois.
 
 La personne ayant reçu un message peut le télécharger à tout moment depuis le serveur. Toutefois, elle ne reçoit pas immédiatement la clé permettant de déchiffrer le contenu. Cette clé lui est transmise uniquement lorsque la date spécifiée est atteinte.
 
-La personne ayant reçu le message peut également recuperer la clé publique de signature de la personne qui a envoyer le message pour controler la signature.
+La personne ayant reçu le message peut également recuperer la clé publique de signature de l'expediteur pour controler la signature.
 
-Le serveur transmet au destinataire :
-- C, le message chiffré
-- S, la signature du message
-- D, la date de déchiffrement
-- pub_sign, la clé pour controler la signature
+Le serveur transmet au client :
+- L'id du message
+- Le nom de l'expediteur
+- Le nom du destinataire
+- La date de déchiffrement
+- La signature du message
+- Les clés publiques de signature et de chiffrement de l'expediteur
+- Le message chiffré
+- Le nom du fichier chiffré
+- La clé symetrique chiffré pour déchiffrer le message et le nom du fichier
 
-Une fois qu'on a atteint la date, le destinataire recoit :
-- I, la clé de déchiffremeent 
+Le controle se fait du côté serveur. Si la date de déchiffrement est dans le futur, la clé symetrique ne sera pas envoyé.
+Côté client, il y a une mémorisation des messages déjà recu grace à l'ID du message. Cela nous permet de telechargé uniquement les messages qu'on n'a pas recu. 
+Cette mémoire se reinitialiser a chaque fermeture du programme. 
 
-## Changement de mot de passe 
+## Changement de mot de passe (change_password)
+
+Pour executer cette fonction l'utilisateur doit être authentifié. C'est-à-dire être en possesion d'un Username/Hash_password correcte. Il devra les transmettre a chaque fois.
+
 
 Pour pouvoir changer de mot de passe, on doit d'abord être connecté. 
 
@@ -105,6 +129,11 @@ Une fois ces étapes effectuées, on peut revoyer au serveur :
 - Le nouveau sel pour le hash du mot de passe => salt1
 - Le nouveau hash => hash_password
 - Le nouveau sel de la clé symetrique => salt2
+
+
+## Demande de clé
+
+Pour executer cette fonction l'utilisateur doit être authentifié. C'est-à-dire être en possesion d'un Username/Hash_password correcte. Il devra les transmettre a chaque fois.
 
 
 # Detail d'implementation 
