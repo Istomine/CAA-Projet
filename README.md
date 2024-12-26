@@ -44,8 +44,6 @@ Les options de l'interface incluent :
 
 Ce projet est divisé en deux grandes catégories : le client et le serveur, chacun étant conçu pour accomplir des tâches spécifiques liées à l'application de messagerie sécurisée.
 
-# Implementation
-
 ## Organisation détaillée du code du projet
 
 Ce projet est divisé en deux grandes catégories : le **client** et le **serveur**, chacun étant conçu pour accomplir des tâches spécifiques liées à l'application de messagerie sécurisée.
@@ -117,6 +115,9 @@ Le serveur centralise les données des utilisateurs et des messages. Il assure l
 4. **`message_database.py`**
    - Gère le stockage des messages dans une base de données JSON.
    - Fournit des fonctions pour ajouter et récupérer les messages en fonction de critères spécifiques (destinataire, date).
+
+
+# Implementation
 
 ## Creation de compte (sign_in)
 
