@@ -115,25 +115,28 @@ Cette mémoire se reinitialiser a chaque fermeture du programme.
 
 Pour executer cette fonction l'utilisateur doit être authentifié. C'est-à-dire être en possesion d'un Username/Hash_password correcte. Il devra les transmettre a chaque fois.
 
+Le changement de mot de passe se fait en plusieurs étapes. D'abord on recrée des nouveaux sels pour le hash_password et pour le sym.
+Puis on utilise notre fonction de dérivation pour créer le nouveau hash => KDF(new_password || new_sal1) = hash_password
+On utilise notre fonction de dérivation pour dérivée une nouvelle clé symetrique pour chiffré les clés privées => KDF(new_password || new_salt2) = sym_m
 
-Pour pouvoir changer de mot de passe, on doit d'abord être connecté. 
-
-On doit recree une nouvelle clé symetrique pour chiffré les clés privées => KDF(new_password || new_salt2) = sym_m
-On chiffre les clés privées de signature et de chiffrement => Cipher_sym(priv_cipher) = Eb1 / Cipher_sym(priv_sign) = Eb2
-
-On recalcule un nouveau hash de mot de passe => KDF(new_password || new_sal1) = hash_password
+On chiffre les clés privées de signature et de chiffrement avec la nouvelle clé symetrique => Cipher_sym(priv_sign) = Eb1 / Cipher_sym(priv_cipher) = Eb2
 
 Une fois ces étapes effectuées, on peut revoyer au serveur :
+- Le nouveau hash => hash_password
+- Le nouveau sel pour le hash du mot de passe => salt1
+- Le nouveau sel de la clé symetrique => salt2
 - Le cipher de la clé privée de chiffrement par la clé symetrique => Eb1
 - Le cipher de la clé privée de signature par la clé symetrique => Eb2
-- Le nouveau sel pour le hash du mot de passe => salt1
-- Le nouveau hash => hash_password
-- Le nouveau sel de la clé symetrique => salt2
 
+Le serveur s'occupe de mettre à jour sa base de donnée des utilisateurs.
 
-## Demande de clé
+## Demande de clé (receive_keys)
 
-Pour executer cette fonction l'utilisateur doit être authentifié. C'est-à-dire être en possesion d'un Username/Hash_password correcte. Il devra les transmettre a chaque fois.
+Pour exécuter cette fonction, l'utilisateur doit être authentifié, c'est-à-dire en possession d'un nom d'utilisateur et d'un mot de passe haché valides. Ces informations doivent être transmises à chaque appel de la fonction.
+
+Cette fonction est similaire à la fonction receive_message. Elle est utilisée pour récupérer les clés des messages encore chiffrés qui ont déjà été téléchargés. Une fois la clé récupérée, la fonction prend également en charge le déchiffrement du message.
+
+Dans cette fonction, le contrôle de la signature du message n'est pas effectué, car cette vérification a déjà été réalisée dans la fonction receive_message.
 
 
 # Detail d'implementation 
