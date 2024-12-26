@@ -1,6 +1,9 @@
 # CAA-Projet
 Implementation Messagerie dans le futur
 
+# Spécifications du projet
+
+# Organisation du code
 
 # Implementation
 
@@ -158,6 +161,8 @@ Ce qui me donne ces parametres recommandé :
 Pour le chiffrement symetrique, j'utilise PyNaCl qui utilise XChacha20 pour le chiffrement dans la classe Aead.
 Et Poly1305 comme MAC.
 
+XChaCha20-Poly1305 est une variante de l'algorithme de chiffrement authentifié ChaCha20-Poly1305, conçue pour offrir une sécurité renforcée grâce à l'utilisation d'un nonce (valeur unique utilisée une seule fois) plus long.
+
 La taille de la clé est de 256 bits (un sel de 128 bits et utilisé)
 La taille du nonce est de 192 bits.
 La taille du compteur est de 64 bits
@@ -182,7 +187,14 @@ La taille de la signature est de 512 bits
 
 ## Algorithme dérivation de clé
 
-L'algorithme de dérivation de clé est Argon2id.
+Argon2 est un algorithme de dérivation de clés conçu pour le hachage sécurisé des mots de passe. Il est réputé pour sa robustesse et a été désigné gagnant du concours Password Hashing Competition (PHC) en 2015. Argon2 est spécialement conçu pour résister aux attaques par force brute, notamment celles effectuées à l'aide de matériel spécialisé comme les GPU et ASIC
+
+Il y a trois variantes principales d'Argon2 : 
+- Argon2d : Optimisé pour résister aux attaques utilisant beaucoup de matériel, mais plus vulnérable aux attaques par canal auxiliaire
+- Argon2i : Optimisé pour résister aux attaques par canal auxiliaire, notamment les attaques de type cache timing.
+- Argon2id : Combine les forces des deux précédents et est recommandé pour la plupart des applications.
+
+Dans ce projet, j'utilise la variante Argon2id
 
 La taille du sel est de 128 bits
 La taille de la clé/hash est de 256 bits
@@ -191,7 +203,7 @@ La taille de la clé/hash est de 256 bits
 
 
 Pour le nombre de thread. Par défaut il y en a 4, j'ai mis a 5 threads
-Pour le cout mémoire,la valeur reste inchangé.
+Pour le cout mémoire,la valeur reste inchangé. 65536 kibibyte.
 Le nombre d'iteration (time_cost). Par defaut il y est a 1, j'ai mis a 20
 Le cout en temps est de 0,5 sec en moyenne.
 
@@ -210,3 +222,5 @@ Des tests ont été fait au prealable en local sur mon ordinateur.
 # Potentiel d'amélioration
 
 En l'état actule il n'y a pas de verification de la robustesse du mot de passe. La fonction est en place, mais il manque le code qui applique une politique de mot de passe.
+
+Il y a beaucoup de code redandant, refactoriser le code pourra pas mal aléger ce dernier
