@@ -110,50 +110,58 @@ Une fois ces étapes effectuées, on peut revoyer au serveur :
 
 # Detail d'implementation 
 
-## Parametre 
+## Parametres
 
-J'ai suivie le recommandation du ANSSI en therme de taille de parametre cryptographique. L'année choisie est 2030 sur le site de keylenght. 
+J'ai suivie le recommandation du ANSSI en therme de taille de parametre cryptographique. L'année choisie est 2030 sur le site keylenght.com
+
+Ce qui me donne ces parametres recommandé : 
 
 * Taille de clé symetrique 128 bits
 * Taille des parametres de la courbes Eliptique 256 bits
 * Taille de hash 256 bits 
 
----------------------------------------------------------
-
-Etant donnée, que j'utilise la librairie PyNaCl, la taille des parametres est déjà definit :
-
-* Taille de clé symetrique 256 bits
-* Taille de nonce 192 bits
-* Taille du sel 128 bits
-
-* Pour la partie asymetrique, on utilise la Curve25519 qui a des nombre de 255 bits
-
-Comme on peut le voir, la parametre de la librairie sont golobalement correcte. 
-
 ## Algorithme de chiffrement
 
-Pour le chiffrement symetrique, j'utilise PyNaCl qui utilise XChacha20 pour le chiffrement dans la classe Aead.
+### Symetrique
 
-Pour le chiffremeent asymetrique la classe Box qui fait du chiffremeent sur une courbe eliptique
+Pour le chiffrement symetrique, j'utilise PyNaCl qui utilise XChacha20 pour le chiffrement dans la classe Aead.
+Et Poly1305 comme MAC.
+
+La taille de la clé est de 256 bits
+La taille du nonce est de 192 bits.
+La taille du compteur est de 64 bits
+La taille du bloque est de 512 bits
+
+
+### Asymetrique
+
+Pour le chiffremeent asymetrique, il se fait sur la courbe eliptique Curve25519 dans la classe Box de PyNaCl
+
+La taille de la clé est de 256 bits
+
+TROUVER DES TAILLES DE PARAM SI POSSIBLE
 
 ## Algorithme de signature
 
 L'algorithme de signature est Ed25519
 
-## Algorithme d'Integrité 
-
-Etant donnée qu'on utilise XChacha20 pour chiffrer. On va utilise Poly1305 pour le MAC
-
-Pour le chiffrement asymetrique, on a aucune information sur le MAC, on sait juste qu'il est de 16 byte
+La taille des clés est de 256 bits
+La taille du seed est de 256 bits
+La taille de la signature est de 512 bits
 
 ## Algorithme dérivation de clé
 
-Dans ce projet, on utilise Argon2id, pour la polivalence.
-Etant donnée que tous les hashs se font du côté client et donc que le serveur n'a pas a supporter la charge de ces calcules, j'ai décidé d'augmenter la valeur des parametres.
+L'algorithme de dérivation de clé est Argon2id.
+
+La taille du sel est de 128 bits
+La taille de la clé/hash est de 256 bits
+
+Étant donné que tous les hachages sont effectués côté client et que le serveur n'a pas à supporter la charge de ces calculs, j'ai décidé d'augmenter la valeur des paramètres.
 
 
-Pour le nombre de thread, j'ai mis a 5 threads
-Pour le cout mémoire, reste inchangé 
+Pour le nombre de thread. Par défaut il y en a 4, j'ai mis a 5 threads
+Pour le cout mémoire,la valeur reste inchangé.
+Le nombre d'iteration (time_cost). Par defaut il y est a 1, j'ai mis a 20
 Le cout en temps est de 0,5 sec en moyenne.
 
 Des tests ont été fait au prealable en local sur mon ordinateur. 
@@ -164,6 +172,3 @@ Des tests ont été fait au prealable en local sur mon ordinateur.
 
 ## 2 Mise en place d'un tunnel TLS
 
-## Déchiffrement offline (a voir)
-
-## Envoit groupé
