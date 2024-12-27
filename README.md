@@ -2,6 +2,9 @@
 
 Implémentation d'une messagerie du futur
 
+![logo](img/logo.webp)
+
+
 # Spécifications du projet
 
 ## Objectif principal :
@@ -157,6 +160,8 @@ On envoit au serveur :
 
 Le serveur recoit les données et les stocks dans une base de donné au format json
 
+![sign_in](img/sign_in.png)
+
 ## Connexion au compte (login)
 
 L'utilisateur envoit dans un premier temps son nom d'utilisateur au serveur. 
@@ -176,6 +181,7 @@ Si le mot de passe correspond. L'utilisateur est authentifié et on lui transmet
 - Le sel pour récuper la clé symetrique => salt2
 - Le cipher de la clé privée de chiffremeent et de la signature => Eb1 / Eb2
 
+![login](img/login.png)
 
 ## Envois de message (send_message)
 
@@ -202,7 +208,9 @@ Voici les étapes pour l'envois d'un message dans le future :
 
 Le serveur à la reception du message, va attribuer un ID unique au message et le stocker dans un base de donnée dédié aux messages au format json.
 
-## Reception du message (reveive_message)
+![send_message](img/send_message.png)
+
+## Reception du message (receive_message)
 
 Pour executer cette fonction l'utilisateur doit être authentifié. C'est-à-dire être en possesion d'un Username/Hash_password correcte. Il devra les transmettre a chaque fois.
 
@@ -227,6 +235,8 @@ Le controle se fait du côté serveur. Si la date de déchiffrement est dans le 
 Côté client, il y a une mémorisation des messages déjà recu grace à l'ID du message. Cela nous permet de telechargé uniquement les messages qu'on n'a pas recu. 
 Cette mémoire se reinitialiser a chaque fermeture du programme. 
 
+![receive_message](img/receive_message.png)
+
 ## Changement de mot de passe (change_password)
 
 Pour executer cette fonction l'utilisateur doit être authentifié. C'est-à-dire être en possesion d'un Username/Hash_password correcte. Il devra les transmettre a chaque fois.
@@ -245,6 +255,9 @@ Une fois ces étapes effectuées, on peut revoyer au serveur :
 - Le cipher de la clé privée de signature par la clé symetrique => Eb2
 
 Le serveur s'occupe de mettre à jour sa base de donnée des utilisateurs.
+
+
+![change_password](img/change_password.png)
 
 ## Demande de clé (receive_keys)
 
