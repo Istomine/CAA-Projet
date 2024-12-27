@@ -10,15 +10,14 @@ def handle_server(client_socket):
 
             if user_input == 1:
                 username, password = request_credentials("Login procedure")
-                client_socket.sendall(b'login')
                 client_data = login(username, password, client_socket)
                 if client_data is not None:
                     handler_app(client_socket, client_data,password,uuid_store)
             elif user_input == 2:
                 print("Create Account :")
-                client_socket.sendall(b'signin')
                 sign_in(client_socket)
             elif user_input == 3:
+                client_socket.sendall(b'exit')
                 break
 
     except Exception as e:
@@ -69,7 +68,7 @@ def handler_app(client_socket, client_data,password,uuid_store):
 
 
 def main():
-    print("Welcome to FuturMessenger")
+    print("Welcome to DelayPost !")
 
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect(('127.0.0.10', 65432))

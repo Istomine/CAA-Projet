@@ -1,5 +1,6 @@
-# CAA-Projet
-Implementation Messagerie dans le futur
+# CAA-Projet - DelayPost
+
+Implémentation d'une messagerie du futur
 
 # Spécifications du projet
 
@@ -275,10 +276,10 @@ Et Poly1305 comme MAC.
 
 XChaCha20-Poly1305 est une variante de l'algorithme de chiffrement authentifié ChaCha20-Poly1305, conçue pour offrir une sécurité renforcée grâce à l'utilisation d'un nonce (valeur unique utilisée une seule fois) plus long.
 
-La taille de la clé est de 256 bits (un sel de 128 bits et utilisé)
-La taille du nonce est de 192 bits.
-La taille du compteur est de 64 bits
-La taille du bloque est de 512 bits
+- La taille de la clé est de 256 bits (un sel cryptographique de 128 bits et utilisé, os.urandom)
+- La taille du nonce est de 192 bits.
+- La taille du compteur est de 64 bits
+- La taille du bloque est de 512 bits
 
 
 ### Asymetrique

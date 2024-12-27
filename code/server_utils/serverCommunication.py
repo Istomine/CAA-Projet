@@ -16,7 +16,7 @@ def message_handler(client_socket: socket.socket):
         client_socket.sendall(b'ok')
 
         # Authentification
-        username = client_socket.recv(5).decode()
+        username = client_socket.recv(20).decode()
         hash_password_client = client_socket.recv(100).decode()
 
         if username not in user_db or hash_password_client != user_db[username]['hash_password']:
@@ -25,7 +25,7 @@ def message_handler(client_socket: socket.socket):
         client_socket.sendall(b'ok')
 
         # Réception de la demande de clé publique
-        key_request = client_socket.recv(1024).decode()
+        key_request = client_socket.recv(50).decode()
         if not key_request.startswith('key :'):
             client_socket.sendall(b'notok')
             return
@@ -77,14 +77,9 @@ def message_handler(client_socket: socket.socket):
 
 
     except Exception as e:
-        print(f"Erreur lors du traitement du client : {e}")
-        try:
-            client_socket.sendall(b'error')
-        except:
-            pass
-    finally:
-        client_socket.close()
-        print("Connexion client fermée")
+        print(f"Error in message_handler : {e}")
+
+
 
 # Envoit les message aux clients
 def send_messages(client_socket: socket.socket):
@@ -266,15 +261,8 @@ def change_password(client_socket: socket.socket):
 
 def sign_in_handler(client_socket: socket.socket):
     try:
-        # Étape 1 : Recevoir 'signin'
-        expected_message = 'signin'
-        message = client_socket.recv(len(expected_message)).decode()
-        if message != expected_message:
-            client_socket.sendall(b'notok')
-            print("Message de signin invalide reçu")
-            return
+
         client_socket.sendall(b'ok')
-        print("Reçu 'signin', envoyé 'ok'")
 
         # Étape 2 : Recevoir les données d'inscription sérialisées
         serialized_data = b''
@@ -328,13 +316,6 @@ def sign_in_handler(client_socket: socket.socket):
 
 def login_handler(client_socket: socket.socket):
     try:
-        # Étape 1 : Recevoir 'Login :'
-        expected_message = 'login'
-        message = client_socket.recv(len(expected_message)).decode()
-        if message != expected_message:
-            client_socket.sendall(b'notok')
-            print("Message de login invalide reçu")
-            return
         client_socket.sendall(b'ok')
 
         # Étape 2 : Recevoir le nom d'utilisateur

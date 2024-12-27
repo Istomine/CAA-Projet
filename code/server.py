@@ -28,7 +28,6 @@ def handle_client(client_socket, addr):
     except Exception as e:
         print(f"Erreur dans handle_client : {e}")
     finally:
-        client_socket.close()
         print(f"Connexion fermée pour {addr}")
 
 
@@ -46,6 +45,7 @@ def handle_app(client_socket):
             elif initial_message.startswith('changepswd'):
                 if change_password(client_socket):
                     print("Password changed !")
+                    break
                 print("Password didn't change")
             elif initial_message.startswith('recvkeys'):
                 send_keys(client_socket)
@@ -57,7 +57,6 @@ def handle_app(client_socket):
         print(f"Erreur dans handle_client : {e}")
 
 
-
 def run_server():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind((HOST, PORT))
@@ -67,6 +66,7 @@ def run_server():
             conn, addr = s.accept()
             print(f"Connexion acceptée de {addr}")
             handle_client(conn, addr)
+            conn.close()
 
 
 

@@ -67,7 +67,7 @@ def sign_in(client_socket : socket.socket):
         client_socket.sendall(serialized_data)
 
         if client_socket.recv(5).decode() == 'notok':
-            print("The server is not ready to receive information, please try again")
+            print("Error during signing, please try again")
             return
 
         print("User created !")
@@ -135,7 +135,7 @@ def send_message(sender,client_socket : socket.socket):
 
         key = client_socket.recv(1024)
 
-        if key == 'notok':
+        if key.decode() == 'notok':
             print(f"Key not found for {receiver}")
             return
 
