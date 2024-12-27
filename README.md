@@ -284,28 +284,32 @@ Ce qui me donne ces parametres recommandé :
 
 ### Symetrique
 
-Pour le chiffrement symetrique, j'utilise PyNaCl qui utilise XChacha20 pour le chiffrement dans la classe Aead.
-Et Poly1305 comme MAC.
+Pour le chiffrement symétrique, j'utilise la bibliothèque PyNaCl, qui implémente XChaCha20 pour le chiffrement au sein de la classe Aead, ainsi que Poly1305 comme mécanisme de contrôle d'intégrité (MAC).
 
-XChaCha20-Poly1305 est une variante de l'algorithme de chiffrement authentifié ChaCha20-Poly1305, conçue pour offrir une sécurité renforcée grâce à l'utilisation d'un nonce (valeur unique utilisée une seule fois) plus long.
+XChaCha20-Poly1305 est une variante de l'algorithme de chiffrement authentifié ChaCha20-Poly1305, conçue pour renforcer la sécurité grâce à l'utilisation d'un nonce (valeur unique utilisée une seule fois) plus long.
 
-- La taille de la clé est de 256 bits (un sel cryptographique de 128 bits et utilisé, os.urandom)
-- La taille du nonce est de 192 bits.
-- La taille du compteur est de 64 bits
-- La taille du bloque est de 512 bits
+- La clé symétrique a une taille de 256 bits.
+Dans notre implémentation, cette clé est dérivée du mot de passe de l'utilisateur à l'aide de la fonction de dérivation de clés Argon2id. Le sel utilisé pour générer la clé est produit par la fonction os.urandom, qui est cryptographiquement sûre.
+  
+- Le nonce mesure 192 bits.
+- Le compteur a une taille de 64 bits.
+- La taille du bloc est de 512 bits.
 
+La gestion du nonce, du compteur et de tous les paramètres autres que la clé symétrique et le sel est déléguée à la classe Aead de PyNaCl, considérée comme sûre.
 
 ### Asymetrique
 
-Pour le chiffremeent asymetrique, il se fait sur la courbe eliptique Curve25519 dans la classe Box de PyNaCl
+Le chiffrement asymétrique s'effectue sur la courbe elliptique Curve25519, mise en œuvre dans la classe Box de la bibliothèque PyNaCl.
 
-La taille de la clé est de 256 bits
+- Les clés (publique/privée) ont une taille de 256 bits chacune.
+- Le nonce généré mesure 192 bits (sa génération et sa gestion sont automatiquement prises en charge par la classe Box).
+- Le tag d'authentification a une taille de 128 bits (son utilisation est transparente et entièrement gérée en interne par la classe).
 
-TROUVER DES TAILLES DE PARAM SI POSSIBLE
+À l'exception de la gestion des clés, l'ensemble des opérations de chiffrement et de gestion des paramètres est délégué à la classe Box.
 
 ## Algorithme de signature
 
-L'algorithme de signature est Ed25519
+L'algorithme de signature est Ed25519, mise en oeuvre dans la classe SigningKey de la biliotheque PyNacl
 
 La taille des clés est de 256 bits
 La taille du seed est de 256 bits
