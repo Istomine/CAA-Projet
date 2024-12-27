@@ -1,6 +1,8 @@
 # Extra
 code/.idea
 code/__pycache__
+code/messages_database.json
+code/user_database.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

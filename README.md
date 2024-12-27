@@ -183,15 +183,13 @@ Pour executer cette fonction l'utilisateur doit être authentifié. C'est-à-dir
 
 Voici les étapes pour l'envois d'un message dans le future :
 
-1. On demande à qui on veut envoyé le message. C'est utile car on doit demandé au serveur la clé publique de la personne à qui on envoit le message
-2. On crée notre message (ici ça sera un fichier qui contient un texte) => M
+1. On demande à qui on veut envoyé le message. C'est utile car on doit demandé au serveur la clé publique de la personne à qui on envoit le message. Permet egalement de controler qu'on envoie à un vrai utilisateur. 
+2. On crée notre message (ici ça sera un fichier qui contient un texte) => message
 3. On crée la clé symetrique pour chiffrer le message => sym_m
 4. On chiffre le contenue du fichier et le nom du fichier => c_message , c_file_name
 5. On donne une date à laquelle, on peut le déchiffrer => date
-6. Avec la clé publique du destinataire on chiffre la clé symetrique qu'on a utilisé pour chiffrer le message => Cipher_pub_cipher(sym_m) = I
-7. On cree une structure qui contient le hash du message chiffré et la date à laquelle on peut ouvrir le message. Cela nous permet de savoir de façon sûr qu'une date est liée à un message
-
-Cette structure contient toutes les données qu'on veut signer. Et c'est cette derniere qu'on va signer avec la clé privée de l'expediteur  => S
+6. Avec la clé publique du destinataire on chiffre la clé symetrique qu'on a utilisé pour chiffrer le message => Cipher_pub_cipher_receiver(sym_m) = I
+7. On va concaténer le message chiffré, le nom du fichier chiffré et la date à laquelle on peut lire le message. Après on passe le tout dans une fonction de hashage pour limiter le contenue a signer et on signe avec la clé privée de l'expediteur => S
 
 8. On transmet au serveur :
 - Le nom de l'expediteur
@@ -208,9 +206,11 @@ Le serveur à la reception du message, va attribuer un ID unique au message et l
 
 Pour executer cette fonction l'utilisateur doit être authentifié. C'est-à-dire être en possesion d'un Username/Hash_password correcte. Il devra les transmettre a chaque fois.
 
-La personne ayant reçu un message peut le télécharger à tout moment depuis le serveur. Toutefois, elle ne reçoit pas immédiatement la clé permettant de déchiffrer le contenu. Cette clé lui est transmise uniquement lorsque la date spécifiée est atteinte.
+La personne ayant reçu un message peut le télécharger à tout moment depuis le serveur. Toutefois, elle ne reçoit pas immédiatement la clé permettant de déchiffrer le contenu. Cette clé lui est transmise uniquement lorsque la date spécifiée est atteinte. Dans le code cela equivaut a avoir la valeur None à l'emplacement de cipher_sym_key.
 
 La personne ayant reçu le message peut également recuperer la clé publique de signature de l'expediteur pour controler la signature.
+
+Le controle de la signature se fait en deux étapes. D'abord on controle que la signature du message vient bien de l'expediteur, puis on controle que le message signé c'est bien celui qu'on a recu.
 
 Le serveur transmet au client :
 - L'id du message

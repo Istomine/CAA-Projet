@@ -157,23 +157,19 @@ def send_message(sender,client_socket : socket.socket):
         cipher_asym = Box(sender.get("priv_cipher"), pub_cipher_receiver)
         i = cipher_asym.encrypt(sym_m)
 
-        # Singature du message chiffré et de la date
-        signed_data = {
-            "hash_encrypted_message": nacl.hash.sha512(c_message, encoder=HexEncoder).decode(),
-            "date": date
-        }
-
-        # Serialisation et signature
-        serialized_signed_data = json.dumps(signed_data).encode('utf-8')
-        s = sender.get("priv_sign").sign(serialized_signed_data)
+        # Singature du hash du message chiffré + nom du fichier chiffré + date
+        c_message = HexEncoder.encode(c_message).decode('utf-8')
+        c_file_name = HexEncoder.encode(c_file_name).decode('utf-8')
+        data_to_sign = nacl.hash.sha512( c_message.encode() + c_file_name.encode() + date.encode(), encoder=HexEncoder)
+        s = sender.get("priv_sign").sign(data_to_sign)
 
         send_data = {
             'sender': sender.get("username"),
             'receiver': receiver,
             'date': date,
             'signature' : HexEncoder.encode(s).decode('utf-8'),
-            'cipher_message' : HexEncoder.encode(c_message).decode('utf-8'),
-            'cipher_file_name': HexEncoder.encode(c_file_name).decode('utf-8'),
+            'cipher_message' : c_message,
+            'cipher_file_name': c_file_name,
             'cipher_sym_key' : HexEncoder.encode(i).decode('utf-8')
         }
         serialized_data = json.dumps(send_data).encode('utf-8')
@@ -227,9 +223,16 @@ def receive_message(sender, client_socket : socket.socket,uuid_store):
             # Controle de la signature
             signature = HexEncoder.decode(msg.get("signature").encode('utf-8'))
             try:
-                pub_sign.verify(signature)
+                # Si la signature est juste la fonction renvoit les données signé
+                hashed_data = pub_sign.verify(signature)
+
+                # On regarde si on a controler la signature du bon message
+                control_data = nacl.hash.sha512(msg['cipher_message'].encode() + msg['cipher_file_name'].encode() + msg['date'].encode(), encoder=HexEncoder)
+                if hashed_data.decode() != control_data.decode():
+                    raise nacl.exceptions.BadSignatureError
+
             except nacl.exceptions.BadSignatureError:
-                print(f"Signature control failed for {msg.get('username')} the message was skipped")
+                print(f"Signature control failed for {msg['id']} the message was skipped")
                 continue
 
             # Dechiffrement du message
@@ -391,8 +394,4 @@ def receive_keys(sender, client_socket : socket.socket,uuid_store):
 
     except Exception as e:
         print("Error in receive_keys :", e)
-
-
-
-
 
