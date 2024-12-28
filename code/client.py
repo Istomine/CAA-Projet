@@ -1,5 +1,11 @@
+import ssl
+from socket import create_connection
+
 from client_utils.user_input import *
 from clientCommunication import *
+
+HOST = '127.0.0.10'  # Adresse IP du serveur
+PORT = 65432
 
 def handle_server(client_socket):
     # Stockage des uuid de message recu
@@ -70,10 +76,14 @@ def handler_app(client_socket, client_data,password,uuid_store):
 def main():
     print("Welcome to DelayPost !")
 
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect(('127.0.0.10', 65432))
 
-    handle_server(client_socket)
+
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    context.load_verify_locations('certif/client/rootCA.crt')
+
+    with create_connection((HOST,PORT )) as client_socket:
+        with context.wrap_socket(client_socket, server_hostname=HOST) as secure_socket:
+            handle_server(secure_socket)
 
     client_socket.close()
 

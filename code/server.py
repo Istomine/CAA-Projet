@@ -1,3 +1,6 @@
+import os
+import ssl
+
 from server_utils.serverCommunication import *
 
 HOST = '127.0.0.10'  # Adresse IP du serveur
@@ -58,15 +61,28 @@ def handle_app(client_socket):
 
 
 def run_server():
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind((HOST, PORT))
-        s.listen()
-        print(f"Serveur en écoute sur {HOST}:{PORT}")
+
+
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    context.load_cert_chain(certfile="certif/server_chain.crt", keyfile="certif/delaypost.key")
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
+
+        server_socket.bind((HOST, PORT))
+        server_socket.listen()
+
+        secure_socket = context.wrap_socket(server_socket, server_side=True)
+
         while True:
-            conn, addr = s.accept()
+            conn, addr = secure_socket.accept()
             print(f"Connexion acceptée de {addr}")
             handle_client(conn, addr)
             conn.close()
+
+
+
+
+
 
 
 
