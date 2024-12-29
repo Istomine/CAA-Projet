@@ -306,11 +306,11 @@ def change_password(sender, client_socket : socket.socket):
         # Generation de la clé symetrique 256 bits
         sym = hash_extruder(KDF(new_password, salt2, 32))
 
-        cipher = nacl.secret.Aead(sym)
+        cipher_sym = nacl.secret.Aead(sym)
 
         # Chiffrement des clés privées
-        Eb1 = cipher.encrypt(sender.get("priv_sign").encode(encoder=HexEncoder))
-        Eb2 = cipher.encrypt(sender.get("priv_cipher").encode(encoder=HexEncoder))
+        Eb1 = cipher_sym.encrypt(sender.get("priv_sign").encode(encoder=HexEncoder))
+        Eb2 = cipher_sym.encrypt(sender.get("priv_cipher").encode(encoder=HexEncoder))
 
         changed_paswd_data = {
             'hash_password' : HexEncoder.encode(hash_password).decode('utf-8'),
@@ -390,7 +390,7 @@ def receive_keys(sender, client_socket : socket.socket,uuid_store):
                 with open(file_path, "w", encoding='utf-8') as file:
                     file.write(decrypted_message)
 
-                uuid_store.remove(msg['id'])
+                uuid_store[msg.get('id')] = False
 
     except Exception as e:
         print("Error in receive_keys :", e)

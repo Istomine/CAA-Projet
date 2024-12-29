@@ -79,8 +79,6 @@ def message_handler(client_socket: socket.socket):
     except Exception as e:
         print(f"Error in message_handler : {e}")
 
-
-
 # Envoit les message aux clients
 def send_messages(client_socket: socket.socket):
     # Envoyer 'ok' pour indiquer que le serveur est prêt
