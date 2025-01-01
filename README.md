@@ -118,31 +118,33 @@ Le serveur centralise les données des utilisateurs et des messages. Il assure l
    - Fournit des fonctions pour ajouter et récupérer les messages en fonction de critères spécifiques (destinataire, date).
 
 
-# Implementation
+# Implémentation
 
-## Creation de compte (sign_in)
+## Création de compte (sign_in)
 
-A la creation de compte, on a besoin de deux choses de l'utilisateur :
+Lors de la création du compte, deux valeurs sont requises de la part de l'utilisateur :
 
 - Un nom d'utilisateur => username
 - Un mot de passe  => password
 
-On a également besoin de deux sels:
+Un contrôle effectué par le serveur permet de vérifier si le nom d'utilisateur est déjà utilisé.
 
-1. Pour le hashage du mot de passe de l'utilisateur. Ce hash est utilisé pour l'authentification => sal1
-2. Pour la dérivation de la clé symetrique => sal2
+Nous aurons également besoin de deux sels qui seront générés par notre programme :
+
+1. Pour le hashage du mot de passe de l'utilisateur. Ce hash est utilisé pour l'authentification => salt1
+2. Pour la dérivation de la clé symetrique => salt2
 
 
-Une fois qu'on à nos deux valeurs et deux sels, on va créer les clés pour pouvoir intéragir avec le serveur :
+Une fois que nous disposons de nos deux valeurs de sel, nous générerons les clés nécessaires pour écrire et recevoir des messages :
 - Le hash pour l'authentification => KDF(password || salt1) = hash_password
 - Une paire de clé asymetrique pour le chiffrement => pub_cipher / priv_cipher
-- Une paire de clé asymetrique pour la signature => pub_sign / priv_sign
+- Une paire de clé asymetrique pour la signature des messages => pub_sign / priv_sign
 - Une clé symetrique dérivée du mot de passe utilisateur => KDF(password || salt2) = sym
 
 
 On va chiffrer :
-- La clé privée de chiffrement par la clé symetrique => Cipher_sym(priv_sign) = Eb1
-- La clé privée de signature par la clé symetrique => Cipher_sym(priv_cipher) = Eb2
+- La clé privée de signature par la clé symetrique => Cipher_sym(priv_sign) = Eb1
+- La clé privée de Chiffrement par la clé symetrique => Cipher_sym(priv_cipher) = Eb2
 
 
 On envoit au serveur :
@@ -161,23 +163,23 @@ Le serveur reçoit les données et les stocke dans une base de données au forma
 
 Cette stratégie a été adoptée car, selon la spécification, le serveur est considéré comme honnête mais curieux. Cela signifie qu'il respectera les protocoles, mais tentera de compromettre la confidentialité des données s'il en a l'opportunité. C'est pourquoi il est crucial de protéger toutes les informations confidentielles, telles que les clés privées de chiffrement et de signature et bien évidemment les messages.
 
-La seule information que le serveur ne possède pas est le mot de passe utilisateur en clair. Toute la sécurité repose donc sur ce mot de passe. Le `hash_password` est utilisé uniquement pour l'authentification. En revanche, la clé symétrique `sym` ne doit jamais être transmise au serveur, afin de garantir la confidentialité des données.
+La seule information que le serveur ne possède pas est le mot de passe utilisateur en clair. Toute la sécurité repose donc sur ce mot de passe. Le `hash_password` est utilisé uniquement pour l'authentification et donc si le serveur le connait, cela ne pose aucun problème. En revanche, la clé symétrique `sym` ne doit jamais être transmise au serveur, afin de garantir la confidentialité des données.
 
-Les sels sont utilisés pour recalculer le `hash_password` et la clé symétrique lors de la connexion depuis un nouvel appareil. Même si le serveur possède le `hash_password` et son sel correspondant, il lui sera très difficile de retrouver le mot de passe en clair, grâce à la robustesse des fonctions de hachage et à l'utilisation des sels.
+Les sels sont utilisés pour recalculer le `hash_password` et la clé symétrique `sym` lors de la connexion depuis un nouvel appareil. Même si le serveur possède le `hash_password` et son sel correspondant, il lui sera très difficile de retrouver le mot de passe en clair, grâce à la robustesse de la fonctions de hachage et à l'utilisation de sel fort.
 
-En ce qui concerne les clés publiques, le serveur ne peut pas en faire grand-chose, si ce n'est vérifier les signatures des messages.
+En ce qui concerne les clés publiques, le serveur ne peut pas en faire grand-chose, si ce n'est vérifier les signatures des messages ou chiffrer et envoyer un message, ce qui dans aucun cas pose un problème de confidentialité.
 
 ## Connexion au compte (login)
 
 L'utilisateur envoit dans un premier temps son nom d'utilisateur au serveur. 
 
-Une fois que le serveur a reçu le nom d'utilisateur, il transmet le sel correspondant au client. Si le compte n'existe pas, le serveur envoie un sel aléatoire au client.
+Lorsque le serveur reçoit le nom d'utilisateur, il transmet le sel correspondant au client. Si le compte n'existe pas, le serveur génère et envoie un sel aléatoire au client. Cette méthode permet de prévenir les attaques par énumération des utilisateurs.
 
-Une fois le sel reçu, le client peut reconstituer le hachage du mot de passe et le transmettre au serveur.
+Une fois le sel reçu, le client peut reconstituer le hachage du mot de passe et le transmettre au serveur pour s'authentifier.
 
-Si le mot de passe haché ne correspond pas à celui stocké dans la base de données du serveur, la procédure de connexion est relancée.
+Si le mot de passe haché ne correspond pas à celui stocké dans la base de données du serveur, la procédure de connexion est stoppée.
 
-Si le mot de passe correspond, l'utilisateur est authentifié, et les informations nécessaires pour déchiffrer ou envoyer des messages lui sont transmises. :
+Si le mot de passe correspond, l'utilisateur est authentifié et les informations nécessaires pour déchiffrer ou envoyer des messages lui sont transmises :
 
 - Son nom d'utilisateur => username
 - Son mot de passe hashé => hash_password
@@ -188,42 +190,48 @@ Si le mot de passe correspond, l'utilisateur est authentifié, et les informatio
 
 ![login](img/login.png)
 
+Cette approche garantit que, quel que soit l'appareil utilisé par l'utilisateur pour se connecter, il disposera toujours des éléments nécessaires pour recevoir, lire et envoyer ses messages.
+
 ## Envois de message (send_message)
 
-Pour exécuter cette fonction, l'utilisateur doit être authentifié, c'est-à-dire en possession d'un nom d'utilisateur et d'un mot de passe haché valides. Ces informations doivent être transmises à chaque appel de la fonction.
+Pour exécuter cette fonction, l'utilisateur doit être authentifié, c'est-à-dire être en possession d'un nom d'utilisateur et d'un mot de passe haché valides. Ces informations doivent être transmises à chaque appel de la fonction.
 
 Voici les étapes pour l'envois d'un message dans le future :
 
-1. On demande à qui on veut envoyé le message. C'est utile car on doit demandé au serveur la clé publique de la personne à qui on envoit le message. Permet egalement de controler qu'on envoie à un vrai utilisateur. 
+1. On commence par demander à qui le message doit être envoyé. Cette étape est essentielle, car elle permet de demander la clé publique de l'utilisateur cible auprès du serveur. Elle sert également à vérifier que le destinataire est bien un utilisateur valide.
 2. On crée notre message (ici ça sera un fichier qui contient un texte) => message
-3. On crée la clé symetrique pour chiffrer le message => sym_m
-4. On chiffre le contenue du fichier et le nom du fichier => c_message , c_file_name
-5. On donne une date à laquelle, on peut le déchiffrer => date
-6. Avec la clé publique du destinataire on chiffre la clé symetrique qu'on a utilisé pour chiffrer le message => Cipher_pub_cipher_receiver(sym_m) = I
-7. On va concaténer le message chiffré, le nom du fichier chiffré et la date à laquelle on peut lire le message. Après on passe le tout dans une fonction de hashage pour limiter le contenue a signer et on signe avec la clé privée de l'expediteur => S
+3. On génère une clé symétrique pour chiffrer le message. À chaque envoi de message, une nouvelle clé est créée. => sym_m
+4. On chiffre le contenu du fichier ainsi que son nom avec la clé symétrique `sym_m` créée précédemment.  => c_message , c_file_name
+5. On définit une date à laquelle le message peut être déchiffré. Si cette date est dans le passé, le destinataire pourra le lire dès sa réception. => date
+6. Avec la clé publique du destinataire, on chiffre la clé symétrique sym_m utilisée pour chiffrer le message. Cette méthode empêche le serveur d'utiliser la clé sym_m pour déchiffrer le message, car il ne possède pas la clé privée nécessaire pour déchiffrer `sym_m`. => Cipher_pub_cipher_receiver(sym_m) = I
+7. Pour la signature, celle-ci se déroule en deux étapes. Dans un premier temps, on concatène le message chiffré, le nom du fichier chiffré, et la date à laquelle le message peut être lu. Le résultat de la concaténation est passé dans une fonction de hachage afin d'avoir une sortie constante. Puis, on signe le hash avec la clé privée de l'expediteur => S
 
-8. On transmet au serveur :
-- Le nom de l'expediteur
-- Le nom du destinataire
-- La date à laquelle on peut lire le message
-- la signature
-- Le message chiffré
-- Le nom du fichié chiffré
-- La clé de chiffrement du message et du nom du fichié, chiffré
+Cette méthode permet de garantir la non-répudiation, l'authentification et l'intégrité du message reçu. En effet, si le message ou la signature est modifié, il devient impossible de vérifier la validité de la signature. 
+
+8. Pour finir, on transmet au serveur :
+- Le nom de l'expediteur => sender
+- Le nom du destinataire => receiver
+- La date à laquelle on peut lire le message => date
+- La signature => s
+- Le message chiffré => c_message
+- Le nom du fichié chiffré => c_file_name
+- La clé utilisée pour chiffrer le message et le nom du fichier est elle-même chiffrée => cipher_sym_key
 
 À la réception d'un message, le serveur attribue un ID unique au message et le stocke dans une base de données dédiée aux messages, au format JSON.
 
 ![send_message](img/send_message.png)
 
-## Reception du message (receive_message)
+## Réception du message (receive_message)
 
-Pour exécuter cette fonction, l'utilisateur doit être authentifié, c'est-à-dire en possession d'un nom d'utilisateur et d'un mot de passe haché valides. Ces informations doivent être transmises à chaque appel de la fonction.
+Pour exécuter cette fonction, l'utilisateur doit être authentifié, c'est-à-dire être en possession d'un nom d'utilisateur et d'un mot de passe haché valides. Ces informations doivent être transmises à chaque appel de la fonction.
 
 La personne ayant reçu un message peut le télécharger à tout moment depuis le serveur. Toutefois, elle ne reçoit pas immédiatement la clé permettant de déchiffrer le contenu. Cette clé lui est transmise uniquement lorsque la date spécifiée est atteinte. Dans le code, cela équivaut à avoir la valeur None à l'emplacement de cipher_sym_key. Un message est également affiché pour indiquer quand le message pourra être déchiffé.
 
 La personne ayant reçu le message peut également récupérer la clé publique de signature de l'expéditeur pour contrôler la signature.
 
-Le contrôle de la signature s'effectue en deux étapes. D'abord on contrôle que la signature du message provient bien de l'expéditeur. Ensuite, on contrôle que le message signé correspond exactement à celui qui a été reçu. Si la signature est invalide, le message n'est pas déchiffré.
+Le contrôle de la signature s'effectue en deux étapes. D'abord on contrôle que la signature du message provient bien de l'expéditeur. 
+
+Ensuite, on vérifie que le message signé correspond exactement à celui qui a été reçu. Pour cela, on hache la concaténation du message chiffré, du nom du fichier chiffré, et de la date, puis on compare le résultat avec le hachage contenu dans la signature. Si la signature n'est invalide pas, le message n'est pas déchiffré.
 
 Le serveur transmet au client :
 - L'id du message 
@@ -237,14 +245,15 @@ Le serveur transmet au client :
 - La clé symetrique chiffré pour déchiffrer le message et le nom du fichier
 
 Le contrôle de la date est effectué côté serveur. Si la date de déchiffrement est dans le futur, la clé symétrique ne sera pas envoyée.
-Côté client, les messages déjà reçus sont mémorisés grâce à leur ID. Cela permet de télécharger uniquement les messages qui n'ont pas encore été reçus.
+
+Côté client, les messages déjà reçus sont mémorisés à l’aide de leur ID. Cela permet de ne télécharger que les messages non encore reçus. Lors de chaque appel de fonction, cette liste d’ID est envoyée au serveur, qui répond uniquement avec les messages ne figurant pas dans la liste.
 Cette mémoire est réinitialisée à chaque fermeture du programme.
 
 ![receive_message](img/receive_message.png)
 
 ## Changement de mot de passe (change_password)
 
-Pour exécuter cette fonction, l'utilisateur doit être authentifié, c'est-à-dire en possession d'un nom d'utilisateur et d'un mot de passe haché valides. Ces informations doivent être transmises à chaque appel de la fonction.
+Pour exécuter cette fonction, l'utilisateur doit être authentifié, c'est-à-dire être en possession d'un nom d'utilisateur et d'un mot de passe haché valides. Ces informations doivent être transmises à chaque appel de la fonction.
 
 Le changement de mot de passe s'effectue en plusieurs étapes. Tout d'abord, deux nouveaux sels sont générés : l'un pour le `hash_password` et l'autre pour la clé symétrique `sym`.
 
@@ -263,11 +272,13 @@ Une fois ces étapes terminées, les données peuvent être renvoyées au serveu
 
 Le serveur prend ensuite en charge la mise à jour de sa base de données des utilisateurs avec les nouvelles informations.
 
+Cette méthode garantit que les clés les plus importantes (les clés asymétriques) restent inchangées lors des modifications de mot de passe. Ainsi, il sera toujours possible de chiffrer et de signer des messages en utilisant les mêmes clés.
+
 ![change_password](img/change_password.png)
 
 ## Demande de clé (receive_keys)
 
-Pour exécuter cette fonction, l'utilisateur doit être authentifié, c'est-à-dire en possession d'un nom d'utilisateur et d'un mot de passe haché valides. Ces informations doivent être transmises à chaque appel de la fonction.
+Pour exécuter cette fonction, l'utilisateur doit être authentifié, c'est-à-dire être en possession d'un nom d'utilisateur et d'un mot de passe haché valides. Ces informations doivent être transmises à chaque appel de la fonction.
 
 Cette fonction est similaire à la fonction `receive_message`. Elle permet de récupérer les clés des messages encore chiffrés qui ont déjà été téléchargés. Après la récupération de la clé, la fonction assure également le déchiffrement du message.
 
@@ -303,7 +314,7 @@ XChaCha20-Poly1305 est une variante de l'algorithme de chiffrement authentifié 
 Dans notre implémentation, cette clé est dérivée du mot de passe de l'utilisateur à l'aide de la fonction de dérivation de clés Argon2id. Le sel utilisé pour générer la clé est produit par la fonction os.urandom, qui est cryptographiquement sûre.
   
 - Le nonce mesure 192 bits.
-- Le compteur a une taille de 64 bits.
+- Le compteur à une taille de 64 bits.
 - La taille du bloc est de 512 bits.
 
 La gestion du nonce, du compteur et de tous les paramètres autres que la clé symétrique et le sel est déléguée à la classe Aead de PyNaCl, considérée comme sûre.
@@ -314,9 +325,9 @@ Le chiffrement asymétrique s'effectue sur la courbe elliptique Curve25519, mise
 
 - Les clés (publique/privée) ont une taille de 256 bits chacune.
 - Le nonce généré mesure 192 bits (sa génération et sa gestion sont automatiquement prises en charge par la classe Box).
-- Le tag d'authentification a une taille de 128 bits (son utilisation est transparente et entièrement gérée en interne par la classe).
+- Le tag d'authentification à une taille de 128 bits (son utilisation est entièrement gérée en interne par la classe Box).
 
-À l'exception de la gestion des clés, l'ensemble des opérations de chiffrement et de gestion des paramètres est délégué à la classe Box.
+À l'exception de la gestion des clés, l'ensemble des opérations de chiffrement et de gestion des paramètres est délégué à la classe Box de PyNaCl, considérée comme sûre.
 
 ## Algorithme de signature
 
@@ -340,7 +351,7 @@ Dans ce projet, j'utilise la variante Argon2id de la bibliothèque argon2-cffi :
 - La taille du sel est de 128 bits, et il est généré manuellement afin de pouvoir être stocké ultérieurement.
 - La taille de la clé ou du hachage est de 256 bits, afin de garantir la compatibilité avec les exigences de la bibliothèque PyNaCl.
 
-Étant donné que tous les hachages sont effectués côté client et que le serveur n'a pas à supporter la charge de ces calculs, j'ai choisi d'augmenter la valeur des paramètres pour renforcer la sécurité :
+Étant donné que tous les hachages sont effectués côté client et que le serveur n'a pas à supporter la charge des calculs, j'ai choisi d'augmenter la valeur des paramètres pour renforcer la sécurité :
 
 - Pour le nombre de thread. Par défaut il y en a 4, j'ai mis 5 threads
 - Pour le cout mémoire,la valeur reste inchangé. 65536 kibibyte.
@@ -348,6 +359,7 @@ Dans ce projet, j'utilise la variante Argon2id de la bibliothèque argon2-cffi :
 - Le cout en temps est de 0,5 sec en moyenne.
 
 Des tests préalables ont été effectués localement sur mon ordinateur pour valider le fonctionnement.
+
 
 # Amélioration de l'application 
 
