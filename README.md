@@ -1,6 +1,6 @@
 # CAA-Projet - DelayPost
 
-Implémentation d'une messagerie du futur
+Implémentation cryptographique d'une messagerie dans le futur
 
 ![logo](img/logo.webp)
 
